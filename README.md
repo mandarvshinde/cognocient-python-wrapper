@@ -1,5 +1,8 @@
 # cognocient
 
+[![PyPI](https://img.shields.io/pypi/v/cognocient.svg)](https://pypi.org/project/cognocient/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A drop-in wrapper around the OpenAI and Anthropic Python SDKs that reports
 usage to Cognocient asynchronously, so you get live cost attribution
 without changing your `base_url` or routing traffic through a proxy.

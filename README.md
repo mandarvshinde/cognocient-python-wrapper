@@ -7,6 +7,12 @@ A drop-in wrapper around the OpenAI and Anthropic Python SDKs that reports
 usage to Cognocient asynchronously, so you get live cost attribution
 without changing your `base_url` or routing traffic through a proxy.
 
+**Supported providers: OpenAI and Anthropic only** (`CognocientOpenAI` and
+`CognocientAnthropic`). Have a Gemini, Mistral, Groq, Together AI, or Azure
+OpenAI key instead? See [Which providers does this cover?](#which-providers-does-this-cover)
+below before you install — this package doesn't have a wrapper class for
+you yet.
+
 ```bash
 pip install cognocient[openai]      # or cognocient[anthropic], or both
 ```
@@ -49,6 +55,31 @@ The wrapper just fires a second, separate, best-effort call afterward to
 log what happened, off the critical path, on a background thread. Losing
 that reporting call (Cognocient down, key wrong, network blip) never
 affects your real API call — see "Reliability" below.
+
+### Which providers does this cover?
+
+Only OpenAI and Anthropic. There is no `CognocientGemini`,
+`CognocientMistral`, `CognocientGroq`, `CognocientTogether`, or
+`CognocientAzureOpenAI` class in this package today — the [Cognocient
+proxy](https://cognocient.com/docs/providers) covers all seven
+(OpenAI, Anthropic, Google Gemini, Mistral, Groq, Together AI, Azure
+OpenAI) because it works at the HTTP layer, not by wrapping each
+provider's SDK object one at a time.
+
+If your key is for one of the five providers this wrapper doesn't
+cover:
+
+1. **Use [the proxy](https://cognocient.com/docs/quickstart) instead** —
+   it's provider-agnostic, covers all seven providers, and adds pre-call
+   budget enforcement this wrapper never provides for any provider.
+2. **Use the [CSV/OTel importer](https://cognocient.com/docs/attribution)**
+   if you want zero live network calls to Cognocient from your runtime —
+   works for any provider, historical-only.
+
+Don't try passing Groq's or Together AI's OpenAI-compatible `base_url`
+into `CognocientOpenAI` — it will run without erroring, but the reported
+`provider` field is hardcoded to `"openai"`, so your dashboard will
+mislabel that spend. Not a supported path.
 
 ## This is one of three ways to see your Cognocient dashboard
 

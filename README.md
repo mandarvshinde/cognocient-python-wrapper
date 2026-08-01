@@ -20,7 +20,7 @@ client = OpenAI(api_key="sk-...")
 from cognocient import CognocientOpenAI as OpenAI
 client = OpenAI(
     api_key="sk-...",              # your own real OpenAI key, used exactly as before
-    cognocient_key="sk-cog-...",   # the same proxy key you'd use with the Cognocient proxy
+    cognocient_key="sk-cog-...",   # auths the async usage report only — no traffic routes through Cognocient
 )
 
 client.chat.completions.create(
@@ -34,6 +34,21 @@ Every method the real SDK exposes still works unchanged. This wrapper only
 intercepts `chat.completions.create()` (`messages.create()` for Anthropic)
 to time the call and report its usage after the fact; everything else is
 forwarded to the real client untouched.
+
+### What is `cognocient_key`, exactly?
+
+It's just an authentication credential — the same kind of API key you'd
+generate for the proxy — but here it does one thing only: it lets the
+wrapper's background reporting call prove to Cognocient's ingestion API
+which account a usage report belongs to. It has nothing to do with your
+actual OpenAI/Anthropic request. That request still goes straight to
+`api.openai.com` / `api.anthropic.com` with your own real provider key,
+exactly like it would with no Cognocient wrapper installed at all — no
+`base_url` change, no network hop, no dependency on Cognocient being up.
+The wrapper just fires a second, separate, best-effort call afterward to
+log what happened, off the critical path, on a background thread. Losing
+that reporting call (Cognocient down, key wrong, network blip) never
+affects your real API call — see "Reliability" below.
 
 ## This is one of three ways to see your Cognocient dashboard
 

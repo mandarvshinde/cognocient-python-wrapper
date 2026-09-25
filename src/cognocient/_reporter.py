@@ -47,6 +47,8 @@ class CallReport:
     tag_gl_account: Optional[str] = None
     tag_workload: Optional[str] = None
     tag_outcome: Optional[str] = None
+    tag_environment: Optional[str] = None
+    tag_variant: Optional[str] = None
     run_id: Optional[str] = None
 
 

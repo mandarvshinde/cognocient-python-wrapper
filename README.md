@@ -1,8 +1,5 @@
 # cognocient
 
-[![PyPI](https://img.shields.io/pypi/v/cognocient.svg)](https://pypi.org/project/cognocient/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
 A drop-in wrapper around the OpenAI and Anthropic Python SDKs that reports
 usage to Cognocient asynchronously, so you get live cost attribution
 without changing your `base_url` or routing traffic through a proxy.
@@ -161,6 +158,8 @@ keyword arguments instead:
 | `cognocient_gl_account` | `X-Cost-GL-Account` |
 | `cognocient_workload` | `X-Cost-Workload` |
 | `cognocient_outcome` | `X-Cost-Outcome` |
+| `cognocient_environment` | `X-Cost-Environment` |
+| `cognocient_variant` | `X-Cost-Variant` |
 | `cognocient_run_id` | `X-Cost-Run-ID` |
 
 ## Development

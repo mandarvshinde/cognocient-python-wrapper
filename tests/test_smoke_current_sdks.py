@@ -64,3 +64,15 @@ def test_tag_kwargs_never_reach_the_real_sdk_call():
     # since neither real SDK accepts them and would raise a TypeError.
     assert not any(k in kwargs for k in TAG_KWARGS)
     assert kwargs == {"model": "gpt-4o"}
+
+
+def test_environment_and_variant_kwargs_map_to_call_report_fields():
+    from dataclasses import asdict
+    from cognocient._reporter import CallReport
+    kwargs = {"model": "gpt-4o", "cognocient_environment": "ci", "cognocient_variant": "prompt-v2"}
+    tags = pop_tags(kwargs)
+    assert tags == {"tag_environment": "ci", "tag_variant": "prompt-v2"}
+    assert kwargs == {"model": "gpt-4o"}
+    # The fields must exist on CallReport (they are sent as-is to /api/ingest/wrapper).
+    report = asdict(CallReport(model="gpt-4o", provider="openai", prompt_tokens=1, completion_tokens=1, latency_ms=1, **tags))
+    assert report["tag_environment"] == "ci" and report["tag_variant"] == "prompt-v2"

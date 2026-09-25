@@ -15,6 +15,8 @@ TAG_KWARGS = (
     "cognocient_gl_account",
     "cognocient_workload",
     "cognocient_outcome",
+    "cognocient_environment",
+    "cognocient_variant",
     "cognocient_run_id",
 )
 

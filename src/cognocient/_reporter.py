@@ -49,6 +49,7 @@ class CallReport:
     tag_outcome: Optional[str] = None
     tag_environment: Optional[str] = None
     tag_variant: Optional[str] = None
+    tag_customer: Optional[str] = None
     run_id: Optional[str] = None
 
 

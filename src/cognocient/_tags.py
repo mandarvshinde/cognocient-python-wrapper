@@ -17,6 +17,7 @@ TAG_KWARGS = (
     "cognocient_outcome",
     "cognocient_environment",
     "cognocient_variant",
+    "cognocient_customer",
     "cognocient_run_id",
 )
 

@@ -163,6 +163,7 @@ keyword arguments instead:
 | `cognocient_outcome` | `X-Cost-Outcome` |
 | `cognocient_environment` | `X-Cost-Environment` |
 | `cognocient_variant` | `X-Cost-Variant` |
+| `cognocient_customer` | `X-Cost-Customer` |
 | `cognocient_run_id` | `X-Cost-Run-ID` |
 
 ## Development

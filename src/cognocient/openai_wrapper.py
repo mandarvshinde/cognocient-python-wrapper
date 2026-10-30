@@ -57,11 +57,16 @@ class _ReportingCompletions:
             model = getattr(response, "model", None) or kwargs.get("model", "unknown")
             prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
             completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
+            # prompt_tokens already includes cached input; report the cached part
+            # so it is priced at the cache-read rate, not the full input rate.
+            details = getattr(usage, "prompt_tokens_details", None) if usage else None
+            cached = getattr(details, "cached_tokens", 0) if details is not None else 0
             self._reporter.report(CallReport(
                 model=model,
                 provider=self._provider,
                 prompt_tokens=prompt_tokens,
                 completion_tokens=completion_tokens,
+                cache_read_tokens=cached if isinstance(cached, int) else 0,
                 latency_ms=latency_ms,
                 status_code=200,
                 **tags,

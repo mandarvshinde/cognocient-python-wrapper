@@ -16,6 +16,12 @@ from ._reporter import DEFAULT_INGEST_URL, CallReport, Reporter
 from ._tags import pop_tags
 
 
+def _int(obj: Any, name: str) -> int:
+    """An int usage field, 0 when absent or None (older SDKs lack the cache fields)."""
+    value = getattr(obj, name, None) if obj is not None else None
+    return value if isinstance(value, int) else 0
+
+
 class _ReportingMessages:
     def __init__(self, real_messages: Any, reporter: Reporter, provider: str):
         self._real = real_messages
@@ -36,14 +42,19 @@ class _ReportingMessages:
         try:
             usage = getattr(response, "usage", None)
             model = getattr(response, "model", None) or kwargs.get("model", "unknown")
-            # Anthropic's usage field names differ from OpenAI's — input/output, not prompt/completion.
-            prompt_tokens = getattr(usage, "input_tokens", 0) if usage else 0
-            completion_tokens = getattr(usage, "output_tokens", 0) if usage else 0
+            # Anthropic's input_tokens excludes cache reads and writes; Cognocient
+            # counts all input in prompt_tokens, with the cache counts as subsets.
+            uncached = _int(usage, "input_tokens")
+            cache_read = _int(usage, "cache_read_input_tokens")
+            cache_write = _int(usage, "cache_creation_input_tokens")
             self._reporter.report(CallReport(
                 model=model,
                 provider=self._provider,
-                prompt_tokens=prompt_tokens,
-                completion_tokens=completion_tokens,
+                prompt_tokens=uncached + cache_read + cache_write,
+                completion_tokens=_int(usage, "output_tokens"),
+                cache_read_tokens=cache_read,
+                cache_write_tokens=cache_write,
+                cache_write_1h_tokens=_int(getattr(usage, "cache_creation", None), "ephemeral_1h_input_tokens"),
                 latency_ms=latency_ms,
                 status_code=200,
                 **tags,

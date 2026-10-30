@@ -36,6 +36,12 @@ class CallReport:
     prompt_tokens: int
     completion_tokens: int
     latency_ms: int
+    # Prompt-cache counts, subsets of prompt_tokens (which counts ALL input);
+    # cache_write_1h_tokens is the part of cache_write_tokens with the
+    # 1-hour TTL, which Anthropic bills at 2x input.
+    cache_read_tokens: int = 0
+    cache_write_tokens: int = 0
+    cache_write_1h_tokens: int = 0
     status_code: int = 200
     cost_usd: Optional[float] = None
     tag_feature: Optional[str] = None

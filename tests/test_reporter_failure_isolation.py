@@ -1,7 +1,7 @@
 """
 Proves the core reliability promise: if Cognocient's ingestion API is
 unreachable, the customer's real provider call still completes normally
-and no exception ever surfaces from the reporting path. Uses httpx.MockTransport
+and no exception ever surfaces from the reporting path. Uses a mock HTTP transport (tests/_mock_http.py)
 to fake the real OpenAI/Anthropic HTTP response (so this doesn't require
 real API keys or network access to the providers), while pointing the
 reporter at a real, guaranteed-unreachable address to force an actual
@@ -10,7 +10,7 @@ connection failure, not a mocked one.
 
 import logging
 
-import httpx
+from _mock_http import mock_http_client as _mock_client
 import pytest
 
 from cognocient import CognocientAnthropic, CognocientOpenAI
@@ -44,14 +44,8 @@ _ANTHROPIC_MESSAGE_JSON = {
 }
 
 
-def _mock_transport(json_body):
-    def handler(request):
-        return httpx.Response(200, json=json_body)
-    return httpx.MockTransport(handler)
-
-
 def test_openai_call_completes_and_raises_nothing_when_ingest_unreachable(caplog):
-    mock_http_client = httpx.Client(transport=_mock_transport(_OPENAI_CHAT_COMPLETION_JSON))
+    mock_http_client = _mock_client("openai", _OPENAI_CHAT_COMPLETION_JSON)
     client = CognocientOpenAI(
         api_key="sk-test-fake",
         http_client=mock_http_client,
@@ -78,7 +72,7 @@ def test_openai_call_completes_and_raises_nothing_when_ingest_unreachable(caplog
 
 
 def test_anthropic_call_completes_and_raises_nothing_when_ingest_unreachable(caplog):
-    mock_http_client = httpx.Client(transport=_mock_transport(_ANTHROPIC_MESSAGE_JSON))
+    mock_http_client = _mock_client("anthropic", _ANTHROPIC_MESSAGE_JSON)
     client = CognocientAnthropic(
         api_key="sk-ant-test-fake",
         http_client=mock_http_client,
@@ -104,7 +98,7 @@ def test_anthropic_call_completes_and_raises_nothing_when_ingest_unreachable(cap
 def test_report_queue_full_drops_silently_without_raising():
     reporter_client = CognocientOpenAI(
         api_key="sk-test-fake",
-        http_client=httpx.Client(transport=_mock_transport(_OPENAI_CHAT_COMPLETION_JSON)),
+        http_client=_mock_client("openai", _OPENAI_CHAT_COMPLETION_JSON),
         cognocient_key="sk-cog-test",
         cognocient_ingest_url=UNREACHABLE_INGEST_URL,
     )

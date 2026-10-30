@@ -1,6 +1,5 @@
 """Cache token counts reach the report, through the real SDK response objects."""
-import httpx
-import pytest
+from _mock_http import mock_http_client
 
 from cognocient import CognocientAnthropic, CognocientOpenAI
 from cognocient._reporter import Reporter
@@ -9,8 +8,8 @@ from cognocient._reporter import Reporter
 def _client(cls, body, monkeypatch):
     reports = []
     monkeypatch.setattr(Reporter, "report", lambda self, r: reports.append(r))
-    http = httpx.Client(transport=httpx.MockTransport(lambda req: httpx.Response(200, json=body)))
-    return cls(api_key="sk-test-fake", http_client=http, cognocient_key="sk-cog-test"), reports
+    sdk = "anthropic" if cls is CognocientAnthropic else "openai"
+    return cls(api_key="sk-test-fake", http_client=mock_http_client(sdk, body), cognocient_key="sk-cog-test"), reports
 
 
 def test_anthropic_reports_all_input_with_cache_subsets_and_the_1h_split(monkeypatch):

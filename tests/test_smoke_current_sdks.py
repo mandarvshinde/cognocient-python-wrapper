@@ -53,7 +53,8 @@ def test_cognocient_openai_delegates_unknown_attributes_to_real_client():
 
 def test_cognocient_anthropic_delegates_unknown_attributes_to_real_client():
     client = CognocientAnthropic(api_key="sk-ant-test-fake", cognocient_key="sk-cog-test")
-    assert client.completions is client._real.completions
+    # models exists in anthropic 0.x and 2.x (2.x removed the legacy completions API)
+    assert client.models is client._real.models
 
 
 def test_tag_kwargs_never_reach_the_real_sdk_call():
